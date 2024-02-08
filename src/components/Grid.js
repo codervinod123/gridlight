@@ -9,42 +9,38 @@ const Grid = () => {
         [1,1,1]
     ];
  
-    const [color,setColor]=useState(new Set());
-    const [count,setCount]=useState(0);
+    const [color,setColor]=useState([]);
+    const [deactivating,setDeactivating]=useState(false);
     // const [indexToDelete, setIndexToDelete] = useState(0);
 
 
    
-    // useEffect(()=>{
-    //   if(dummy.length>=8){
-   
-    //      const t=setInterval(()=>{
-      
-    //     const newDummy = [...dummy];
-    //        newDummy.splice(indexToDelete,1);
-    //        setDummy(newDummy);
-    //        setIndexToDelete(indexToDelete+1);
-    //        console.log(dummy);
-    //     },1000) 
+ 
 
-    //  return ()=>clearTimeout(t);
-
-    //   }
-
-    useEffect(()=>{
-       
-      if(count>=8){
-         
-          const colorArray = Array.from(color);
-          const lastElement = colorArray[colorArray.length - 1];
-          console.log(lastElement);
-     }
-    },[count])
 
     const handleOnOff=(index)=>{
-        console.log(`on/off ${index}`);
-        setColor(new Set([...color,index]));
-        setCount(count+1);
+
+          const newColor=[...color,index];
+          setColor(newColor);
+          if(newColor.length===8) {
+            deActivateCells();
+          }
+    }
+
+    const deActivateCells=()=>{
+        setDeactivating(true);
+        const timer=setInterval(()=>{
+           setColor((originalColor)=>{
+             const newColor=originalColor.slice();
+             newColor.pop();
+
+             if(newColor.length===0){
+               clearInterval(timer);
+               setDeactivating(false);
+             }
+            return newColor;
+           })
+        },400)
     }
 
   return (
@@ -53,9 +49,9 @@ const Grid = () => {
         config.flat(1).map((data,index)=>{
             return(
                 data?
-                <div onClick={()=>handleOnOff(index)} key={index} >
-                   <div className={`h-20 w-20 border border-black  ${color.has(index)?"bg-green-500":""}` }></div>
-                </div>
+                <button disabled={color.includes(index)} onClick={()=>handleOnOff(index)} key={index} >
+                   <div className={`h-20 w-20 border border-black ${color.includes(index)?"bg-green-500":""}`}></div>
+                </button>
                 :<span key={index}></span>                
             )
         })
